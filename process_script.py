@@ -76,21 +76,36 @@ def validate_quantity(quantity) -> tuple[bool, str]:
     try:
         int_quantity = int(quantity)
     except ValueError:
-        print('non-int quantity', quantity)
+        # print('non-int quantity', quantity)
         return [False, 'non-int quantity']
     else:
         if int_quantity <= 0:
-            print('quantity not positive int', quantity)
+            # print('quantity not positive int', quantity)
             return [False, 'quantity not positive int']
+        else: 
+            return [True, 'Valid']
+        
+def validate_days_supply(supply) -> tuple[bool, str]:
+    """ensure it's an integer between 1-90"""
+    try:
+        int_supply = int(supply)
+    except ValueError:
+        print('non-int supply', supply)
+        return [False, 'non-int supply']
+    else:
+        if  not (1 <= int_supply <= 90):
+            print('supply not positive int', supply)
+            return [False, 'supply not between 1 and 90']
         else: 
             return [True, 'Valid']
 
 
 # will probably want an array of the validator functions
-validator_function_tuple = (validate_claim_id, validate_member_id, validate_ndc, validate_date, validate_quantity)
+validator_function_tuple = (validate_claim_id, validate_member_id, validate_ndc, validate_date, validate_quantity, validate_days_supply)
 def validate_row(row: list):
     """Calls all the validator methods on each field, returns false if anything is wrong"""
     for index, validator_function in enumerate(validator_function_tuple):
+        # print('index', index, row)
         validator_function(row[index]) # should fail if there's a false value in the return tuple
     
 
