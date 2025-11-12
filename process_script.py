@@ -9,6 +9,7 @@
 # should I download the NDC database or use an API? Let's check how big the file is - if I do it with the API should do some cacheing
 # also maybe add a run option? for NDV validation I mean
 import csv
+from datetime import datetime
 # We assume a consistent data structure
 column_number_to_field = {
     0: 'claim_id', # (string, unique identifier)
@@ -47,17 +48,33 @@ def validate_ndc(ndc) -> tuple[bool, str]:
     # todo use the ndc api or download the database
     stripped_ndc = ndc.replace('-', '')
     if len(stripped_ndc) != 11:
-        print('stripped ndc does not have 11 digits', stripped_ndc)
+        # print('stripped ndc does not have 11 digits', stripped_ndc)
         return [False, 'stripped ndc does not have 11 digits']
     try:
         int(stripped_ndc)
     except ValueError:
-        print('stripped ndc is not a number', stripped_ndc)
+        # print('stripped ndc is not a number', stripped_ndc)
         return [False, 'stripped ndc is not a number']
     return [True, 'Valid']
 
+def validate_date(date) -> tuple[bool, str]:
+    """ensure it's a valid date and not future dated"""
+    try:
+        formatted_data = datetime.strptime(date, '%Y-%m-%d')
+    except ValueError:
+        print('invalid date', date)
+        return [False, 'invalid date']
+    else:
+        if formatted_data > datetime.now():
+            print('future date', date)
+            return [False, 'future date']
+        else: 
+            return [True, 'Valid']
+    
+
+
 # will probably want an array of the validator functions
-validator_function_tuple = (validate_claim_id, validate_member_id, validate_ndc)
+validator_function_tuple = (validate_claim_id, validate_member_id, validate_ndc, validate_date)
 def validate_row(row: list):
     """Calls all the validator methods on each field, returns false if anything is wrong"""
     for index, validator_function in enumerate(validator_function_tuple):
