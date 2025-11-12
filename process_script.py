@@ -31,9 +31,12 @@ def validate_claim_id(claim_id) -> tuple[bool, str]:
     return [True, 'Valid']
 
 # will probably want an array of the validator functions
+validator_function_tuple = (validate_claim_id, )
 def validate_row(row: list):
-    validate_claim_id(row[0])
-    """Calls all the validator methods on each field"""
+    """Calls all the validator methods on each field, returns false if anything is wrong"""
+    for index, validator_function in enumerate(validator_function_tuple):
+        validator_function(row[index]) # should fail if there's a false value in the return tuple
+    
 
 with open('data.csv') as csvfile:
     data_reader = csv.reader(csvfile)
