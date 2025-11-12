@@ -25,7 +25,7 @@ claim_id_list =  []
 def validate_claim_id(claim_id) -> tuple[bool, str]:
     """Need to check that it's not a duplicate"""
     if claim_id in claim_id_list: 
-        print('Found a claim dupe!', claim_id)
+        # print('Found a claim dupe!', claim_id)
         return [False, 'Duplicate claim Id']
     claim_id_list.append(claim_id)
     return [True, 'Valid']
@@ -33,16 +33,31 @@ def validate_claim_id(claim_id) -> tuple[bool, str]:
 def validate_member_id(member_id) -> tuple[bool, str]:
     """Check that it's a number and that it's ten digits"""
     if len(member_id) != 10:
-        print('member id not ten digits', member_id)
+        # print('member id not ten digits', member_id)
         return [False, 'member id not ten digits']
     try:
         int(member_id)
     except ValueError:
-        print('member id is not a number', member_id)
+        # print('member id is not a number', member_id)
         return [False, 'member id is not a number']
     return [True, 'Valid']
+
+def validate_ndc(ndc) -> tuple[bool, str]:
+    """Check that it's a an eleven digit number"""
+    # todo use the ndc api or download the database
+    stripped_ndc = ndc.replace('-', '')
+    if len(stripped_ndc) != 11:
+        print('stripped ndc does not have 11 digits', stripped_ndc)
+        return [False, 'stripped ndc does not have 11 digits']
+    try:
+        int(stripped_ndc)
+    except ValueError:
+        print('stripped ndc is not a number', stripped_ndc)
+        return [False, 'stripped ndc is not a number']
+    return [True, 'Valid']
+
 # will probably want an array of the validator functions
-validator_function_tuple = (validate_claim_id, validate_member_id)
+validator_function_tuple = (validate_claim_id, validate_member_id, validate_ndc)
 def validate_row(row: list):
     """Calls all the validator methods on each field, returns false if anything is wrong"""
     for index, validator_function in enumerate(validator_function_tuple):
@@ -59,4 +74,3 @@ with open('data.csv') as csvfile:
         #         print (column_number_to_field[index], value)  
         elif line_number != 0:
             validate_row(row)
-print(claim_id_list)
