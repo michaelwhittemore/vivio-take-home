@@ -1,5 +1,6 @@
 # First pass notes
 # Should go through each field and validate that they match the correct pattern - maybe regex?
+# Let's create a 'validator' function for and use it for each row when we iterate over the non 0 ones
 
 # maybe i should write out my thought process to present to the company? 
 # need to double check on best naming conventions
@@ -8,7 +9,7 @@
 import csv
 # We assume a consistent data structure
 column_number_to_field = {
-    0 : 'claim_id', # (string, unique identifier)
+    0: 'claim_id', # (string, unique identifier)
     1: 'member_id', # (string, 10 digits)
     2: 'ndc', # (string, 11-digit National Drug Code)
     3: 'date_of_service', # (YYYY-MM-DD)
@@ -19,9 +20,11 @@ column_number_to_field = {
 }
 with open('data.csv') as csvfile:
     data_reader = csv.reader(csvfile)
-    line_number = 0
+    line_number = 0 # should probably replace this with enumerate as well
     for row in data_reader:
         if line_number == 0:
             print('these are the labels;', row)
-        print(', '.join(row))
+        if line_number == 1:
+            for index, value in enumerate(row):
+                print (column_number_to_field[index], value)            
         line_number += 1
