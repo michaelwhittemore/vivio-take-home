@@ -9,6 +9,7 @@
 # should I download the NDC database or use an API? Let's check how big the file is - if I do it with the API should do some cacheing
 # also maybe add a run option? for NDC validation I mean
 import csv
+import json
 from datetime import datetime
 # We assume a consistent data structure
 column_number_to_field = {
@@ -126,18 +127,31 @@ def validate_plan_type(plan) -> tuple[bool, str]:
 # use a dictionary to map the functions to field names
 validator_function_tuple = (validate_claim_id, validate_member_id, validate_ndc, validate_date, validate_quantity,
                             validate_days_supply,validate_drug_cost, validate_plan_type)
-def validate_row(row: list):
+
+def validate_pills_per_day(row: list) -> bool:
+    """returns false if quantity / days_supply > 3 and assumes correct integer input"""
+    quantity = int(row[4])
+    days = int(row[5])
+    return quantity / days <= 3
+
+def validate_row(row: list) -> tuple[bool, str]:
     """Calls all the validator methods on each field, returns false if anything is wrong"""
     for index, validator_function in enumerate(validator_function_tuple):
         # print('index', index, row)
-        validator_function(row[index]) # should fail if there's a false value in the return tuple
-        # should also validate pills per day
+        validator_output_tuple = validator_function(row[index]) # should fail if there's a false value in the return tuple
+        if not validator_output_tuple[0]:
+            return validator_output_tuple
+    # validate pills per day after each individual field is completed
+    if not validate_pills_per_day(row):
+        # print('Invalid pills per day', row)
+        return [False, 'Invalid pills per day']
+    else:
+        return [True, 'null']
+    
 
 def calculate_copay_from_row(row: list) -> float:
     """calculates using the plan type, NDC, and cost"""
     # it might make more sense to pass in specific values and not the whole row
-    print(row)
-    print('type:', row[7])
     match row[7]:
         case 'medicaid':
             # Medicaid: $0 copay
@@ -160,17 +174,31 @@ def calculate_copay_from_row(row: list) -> float:
             print('invalid plan type, we should never reach here')
             return -1
 
+output_for_json = {}
 
 with open('data.csv') as csvfile:
     data_reader = csv.reader(csvfile)
     for line_number, row in enumerate(data_reader):
         if line_number == 0:
             print('these are the labels;', row)
-        # if line_number == 1:
-        #     for index, value in enumerate(row):
-        #         print (column_number_to_field[index], value)  
         elif line_number != 0:
-            validate_row(row)
-            # only do the copay calculations if the row passes the validator
-        if (21 <= line_number <= 26): #remove this 
-            print('copay:', calculate_copay_from_row(row))
+            validator_output_bool, rejection_reason = validate_row(row)
+            processed_at = datetime.now().isoformat()
+            if not validator_output_bool:
+                output_for_json[line_number] = {
+                    "claim_id": row[0],
+                    "status": "REJECT",
+                    "copay_amount": 'N/A',
+                    "rejection_reason": rejection_reason,
+                    "processed_at": processed_at,
+                }
+            else:
+                output_for_json[line_number] = {
+                    "claim_id": row[0],
+                    "status": "APPROVED",
+                    "copay_amount": calculate_copay_from_row(row), # only do calculation if everything passes
+                    "rejection_reason": 'null',
+                    "processed_at": processed_at,
+                }
+with open('testOutput.json', 'w') as outfile:
+    json.dump(output_for_json, outfile, indent=4)
