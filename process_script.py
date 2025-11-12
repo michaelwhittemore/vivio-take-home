@@ -62,19 +62,32 @@ def validate_date(date) -> tuple[bool, str]:
     try:
         formatted_data = datetime.strptime(date, '%Y-%m-%d')
     except ValueError:
-        print('invalid date', date)
+        # print('invalid date', date)
         return [False, 'invalid date']
     else:
         if formatted_data > datetime.now():
-            print('future date', date)
+            # print('future date', date)
             return [False, 'future date']
         else: 
             return [True, 'Valid']
     
+def validate_quantity(quantity) -> tuple[bool, str]:
+    """ensure it's a positive integer"""
+    try:
+        int_quantity = int(quantity)
+    except ValueError:
+        print('non-int quantity', quantity)
+        return [False, 'non-int quantity']
+    else:
+        if int_quantity <= 0:
+            print('quantity not positive int', quantity)
+            return [False, 'quantity not positive int']
+        else: 
+            return [True, 'Valid']
 
 
 # will probably want an array of the validator functions
-validator_function_tuple = (validate_claim_id, validate_member_id, validate_ndc, validate_date)
+validator_function_tuple = (validate_claim_id, validate_member_id, validate_ndc, validate_date, validate_quantity)
 def validate_row(row: list):
     """Calls all the validator methods on each field, returns false if anything is wrong"""
     for index, validator_function in enumerate(validator_function_tuple):
