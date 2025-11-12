@@ -1,9 +1,4 @@
-# First pass notes
-# Should go through each field and validate that they match the correct pattern - maybe regex?
-# Let's create a 'validator' function for and use it for each row when we iterate over the non 0 ones
 
-# maybe i should write out my thought process to present to the company? 
-# need to double check on best naming conventions
 # maybe note down future work that should be done?
 # note that I'm commit more than I otherwise would
 # should I download the NDC database or use an API? Let's check how big the file is - if I do it with the API should do some cacheing
@@ -12,6 +7,7 @@ import csv
 import json
 from datetime import datetime
 # We assume a consistent data structure
+# I don't actually use this dict anywhere, it just makes it easier to reference
 column_number_to_field = {
     0: 'claim_id', # (string, unique identifier)
     1: 'member_id', # (string, 10 digits) - member_id must be exactly 10 digits
@@ -176,29 +172,31 @@ def calculate_copay_from_row(row: list) -> float:
 
 output_for_json = {}
 
-with open('data.csv') as csvfile:
-    data_reader = csv.reader(csvfile)
-    for line_number, row in enumerate(data_reader):
-        if line_number == 0:
-            print('these are the labels;', row)
-        elif line_number != 0:
-            validator_output_bool, rejection_reason = validate_row(row)
-            processed_at = datetime.now().isoformat()
-            if not validator_output_bool:
-                output_for_json[line_number] = {
-                    "claim_id": row[0],
-                    "status": "REJECT",
-                    "copay_amount": 'N/A',
-                    "rejection_reason": rejection_reason,
-                    "processed_at": processed_at,
-                }
-            else:
-                output_for_json[line_number] = {
-                    "claim_id": row[0],
-                    "status": "APPROVED",
-                    "copay_amount": calculate_copay_from_row(row), # only do calculation if everything passes
-                    "rejection_reason": 'null',
-                    "processed_at": processed_at,
-                }
-with open('testOutput.json', 'w') as outfile:
-    json.dump(output_for_json, outfile, indent=4)
+def main():
+    with open('data.csv') as csvfile:
+        data_reader = csv.reader(csvfile)
+        for line_number, row in enumerate(data_reader):
+            if line_number != 0:
+                validator_output_bool, rejection_reason = validate_row(row)
+                processed_at = datetime.now().isoformat()
+                if not validator_output_bool:
+                    output_for_json[line_number] = {
+                        "claim_id": row[0],
+                        "status": "REJECT",
+                        "copay_amount": 'N/A',
+                        "rejection_reason": rejection_reason,
+                        "processed_at": processed_at,
+                    }
+                else:
+                    output_for_json[line_number] = {
+                        "claim_id": row[0],
+                        "status": "APPROVED",
+                        "copay_amount": calculate_copay_from_row(row), # only do calculation if everything passes
+                        "rejection_reason": 'null',
+                        "processed_at": processed_at,
+                    }
+    with open('processed_claims.json', 'w') as outfile:
+        json.dump(output_for_json, outfile, indent=4)
+
+if __name__ == "__main__":
+    main()
