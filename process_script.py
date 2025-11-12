@@ -7,7 +7,7 @@
 # maybe note down future work that should be done?
 # note that I'm commit more than I otherwise would
 # should I download the NDC database or use an API? Let's check how big the file is - if I do it with the API should do some cacheing
-# also maybe add a run option? for NDV validation I mean
+# also maybe add a run option? for NDC validation I mean
 import csv
 from datetime import datetime
 # We assume a consistent data structure
@@ -116,13 +116,14 @@ def validate_drug_cost(cost) -> tuple[bool, str]:
 def validate_plan_type(plan) -> tuple[bool, str]:
     """ensure it's one of "commercial", "medicare", or "medicaid" """
     if not plan in ("commercial", "medicare", "medicaid"):
-        print('invalid plan type', plan)
+        # print('invalid plan type', plan)
         return [False, 'invalid plan type']
     else:
         return [True, 'Valid']
 
 
-# will probably want an array of the validator functions
+# The validators are just listed numerically so they can share the index, if it was more inconsistent we'd want to 
+# use a dictionary to map the functions to field names
 validator_function_tuple = (validate_claim_id, validate_member_id, validate_ndc, validate_date, validate_quantity,
                             validate_days_supply,validate_drug_cost, validate_plan_type)
 def validate_row(row: list):
@@ -130,7 +131,35 @@ def validate_row(row: list):
     for index, validator_function in enumerate(validator_function_tuple):
         # print('index', index, row)
         validator_function(row[index]) # should fail if there's a false value in the return tuple
-    
+        # should also validate pills per day
+
+def calculate_copay_from_row(row: list) -> float:
+    """calculates using the plan type, NDC, and cost"""
+    # it might make more sense to pass in specific values and not the whole row
+    print(row)
+    print('type:', row[7])
+    match row[7]:
+        case 'medicaid':
+            # Medicaid: $0 copay
+            return 0
+        case 'medicare':
+            # Medicare: $5 flat copay for generic, $15 for brand (if NDC starts with "0")
+            return 5 if row[2][0] == '0' else 15
+        case 'commercial':
+            # Commercial: 20% coinsurance, minimum $10, maximum $100
+            cost = float(row[6])
+            rounded_cost = round(0.2 * cost, 2) 
+            if rounded_cost < 10:
+                return 10
+            elif rounded_cost > 100:
+                return 100
+            else:
+                return rounded_cost
+        case _:
+             # we validate before using this so it should never slip through
+            print('invalid plan type, we should never reach here')
+            return -1
+
 
 with open('data.csv') as csvfile:
     data_reader = csv.reader(csvfile)
@@ -142,3 +171,6 @@ with open('data.csv') as csvfile:
         #         print (column_number_to_field[index], value)  
         elif line_number != 0:
             validate_row(row)
+            # only do the copay calculations if the row passes the validator
+        if (21 <= line_number <= 26): #remove this 
+            print('copay:', calculate_copay_from_row(row))
