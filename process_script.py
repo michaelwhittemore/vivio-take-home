@@ -34,8 +34,8 @@ def validate_claim_id(claim_id) -> tuple[bool, str]:
 def validate_member_id(member_id) -> tuple[bool, str]:
     """Check that it's a number and that it's ten digits"""
     if len(member_id) != 10:
-        # print('member id not ten digits', member_id)
-        return [False, 'member id not ten digits']
+        # print('member is not ten digits', member_id)
+        return [False, 'member is not ten digits']
     try:
         int(member_id)
     except ValueError:

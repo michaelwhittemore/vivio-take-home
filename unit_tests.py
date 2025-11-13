@@ -1,7 +1,7 @@
 import unittest
 import process_script
 
-#validator_function_tuple = (validate_claim_id, validate_member_id, validate_ndc, validate_date, validate_quantity,
+#validator_function_tuple = (validate_claim_id, validate_ndc, validate_date, validate_quantity,
 #                            validate_days_supply,validate_drug_cost, validate_plan_type)
 
 class TestValidators(unittest.TestCase):
@@ -10,23 +10,49 @@ class TestValidators(unittest.TestCase):
 
     def test_validate_member_id(self):
         valid_id =  '1234567890'
-        short_id_= '123'
+        short_id = '123'
         long_id = '12345678902132131'
-        non_init_id = '123456789a'
+        non_int_id = '123456789a'
+        # Happy path
         valid_bool, valid_reason = process_script.validate_member_id(valid_id)
         self.assertTrue(valid_bool)
-        self.assertIs(valid_reason, 'Valid')
+        self.assertEqual(valid_reason, 'Valid')
+        # Too short
+        short_bool, short_reason = process_script.validate_member_id(short_id)
+        self.assertFalse(short_bool)
+        self.assertEqual(short_reason, 'member is not ten digits')
+        # Too long
+        long_bool, long_reason = process_script.validate_member_id(long_id)
+        self.assertFalse(long_bool)
+        self.assertEqual(long_reason, 'member is not ten digits')
+        # Not an int
+        not_int_bool, not_int_reason = process_script.validate_member_id(non_int_id)
+        self.assertFalse(not_int_bool)
+        self.assertEqual(not_int_reason, 'member id is not a number')
 
-    def test_isupper(self):
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
+    def test_validate_ndc(self):
+        valid_dnc =  '00002-7510-01'
+        short_dnc = '002-7510-01'
+        long_dnc = '000102-7510-01'
+        non_int_dnc = '000a2-7510-01'
+        # Happy path
+        valid_bool, valid_reason = process_script.validate_ndc(valid_dnc)
+        self.assertTrue(valid_bool)
+        self.assertEqual(valid_reason, 'Valid')
+        # Too short
+        short_bool, short_reason = process_script.validate_ndc(short_dnc)
+        self.assertFalse(short_bool)
+        self.assertEqual(short_reason, 'stripped ndc does not have 11 digits')
+        # Too long
+        long_bool, long_reason = process_script.validate_ndc(long_dnc)
+        self.assertFalse(long_bool)
+        self.assertEqual(long_reason, 'stripped ndc does not have 11 digits')
+        # Not an int
+        not_int_bool, not_int_reason = process_script.validate_ndc(non_int_dnc)
+        self.assertFalse(not_int_bool)
+        self.assertEqual(not_int_reason, 'stripped ndc is not a number')
 
-    def test_split(self):
-        s = 'hello world'
-        self.assertEqual(s.split(), ['hello', 'world'])
-        # check that s.split fails when the separator is not a string
-        with self.assertRaises(TypeError):
-            s.split(2)
+
 
 if __name__ == '__main__':
     unittest.main()
