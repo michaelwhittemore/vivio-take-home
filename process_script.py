@@ -3,9 +3,12 @@
 # note that I'm commit more than I otherwise would
 # should I download the NDC database or use an API? Let's check how big the file is - if I do it with the API should do some cacheing
 # also maybe add a run option? for NDC validation I mean
+# https://open.fda.gov/apis/drug/ndc/
 import csv
 import json
 from datetime import datetime
+
+
 # We assume a consistent data structure
 # I don't actually use this dict anywhere, it just makes it easier to reference
 column_number_to_field = {
@@ -176,6 +179,7 @@ def main():
     with open('data.csv') as csvfile:
         data_reader = csv.reader(csvfile)
         for line_number, row in enumerate(data_reader):
+            print(row)
             if line_number != 0:
                 validator_output_bool, rejection_reason = validate_row(row)
                 processed_at = datetime.now().isoformat()
