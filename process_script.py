@@ -105,7 +105,7 @@ def validate_drug_cost(cost) -> tuple[bool, str]:
         numeric_cost = float(cost)
     except ValueError:
         # print('non-int cost', cost)
-        return [False, 'non-int cost']
+        return [False, 'non-number cost']
     else:
         if  numeric_cost <= 0:
             # print('cost not positive', cost)

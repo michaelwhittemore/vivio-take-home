@@ -1,8 +1,6 @@
 import unittest
 import process_script
 
-#validator_function_tuple = (,validate_drug_cost, validate_plan_type)
-
 class TestValidators(unittest.TestCase):
     def test_validate_claim_id(self):
         # Happy path
@@ -119,6 +117,40 @@ class TestValidators(unittest.TestCase):
         self.assertFalse(tested_bool)
         self.assertEqual(tested_reason, 'non-int supply')
 
+    def test_validate_drug_cost(self):
+
+        valid_cost = '30'
+        non_number_cost = '3a0.5'
+        negative_cost = '-30'
+        # Happy path
+        tested_bool, tested_reason = process_script.validate_drug_cost(valid_cost)
+        self.assertTrue(tested_bool)
+        self.assertEqual(tested_reason, 'Valid')
+        # negative cost
+        tested_bool, tested_reason = process_script.validate_drug_cost(negative_cost)
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'cost not positive')
+        # bad cost
+        tested_bool, tested_reason = process_script.validate_drug_cost(non_number_cost)
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'non-number cost')
+    
+    def test_validate_plan_type(self):
+        # Happy paths
+        "commercial", "medicare", "medicaid"
+        tested_bool, tested_reason = process_script.validate_plan_type('commercial')
+        self.assertTrue(tested_bool)
+        self.assertEqual(tested_reason, 'Valid')
+        tested_bool, tested_reason = process_script.validate_plan_type('medicare')
+        self.assertTrue(tested_bool)
+        self.assertEqual(tested_reason, 'Valid')
+        tested_bool, tested_reason = process_script.validate_plan_type('medicaid')
+        self.assertTrue(tested_bool)
+        self.assertEqual(tested_reason, 'Valid')       
+        # Invalid plan
+        tested_bool, tested_reason = process_script.validate_plan_type('michael-care')
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'invalid plan type')       
 
 if __name__ == '__main__':
     unittest.main()
@@ -127,8 +159,6 @@ if __name__ == '__main__':
 ['claim_id', 'member_id', 'ndc', 'date_of_service', 'quantity', 'days_supply', 'drug_cost', 'plan_type']
 ['CLM001', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
 
-['floatSupply', '1234567890', '00002-7510-01', '2025-10-15', '30', '30.4', '150.00', 'commercial']
-['largeSupply', '1234567890', '00002-7510-01', '2025-10-15', '30', '99', '150.00', 'commercial']
 ['negativeCost', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '-150.00', 'commercial']
 ['badCost', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '15a0.00', 'commercial']
 ['invalidPlan', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'badPlanString']
