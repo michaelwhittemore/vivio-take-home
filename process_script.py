@@ -179,7 +179,6 @@ def main():
     with open('data.csv') as csvfile:
         data_reader = csv.reader(csvfile)
         for line_number, row in enumerate(data_reader):
-            print(row)
             if line_number != 0:
                 validator_output_bool, rejection_reason = validate_row(row)
                 processed_at = datetime.now().isoformat()

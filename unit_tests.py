@@ -4,17 +4,18 @@ import process_script
 #validator_function_tuple = (validate_claim_id, validate_member_id, validate_ndc, validate_date, validate_quantity,
 #                            validate_days_supply,validate_drug_cost, validate_plan_type)
 
-class TestClaimsProcessing(unittest.TestCase):
-
+class TestValidators(unittest.TestCase):
     # def test_validate_claim_id(self):
     #     validate_claim_id()
 
     def test_validate_member_id(self):
-        valid_row = ['CLM001', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
-        short_id_row = ['CLM001', '123', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
-        long_id_row = ['CLM001', '123456789123123', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
-        non_init_id_row = ['CLM001', '123456789123123', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
-
+        valid_id =  '1234567890'
+        short_id_= '123'
+        long_id = '12345678902132131'
+        non_init_id = '123456789a'
+        valid_bool, valid_reason = process_script.validate_member_id(valid_id)
+        self.assertTrue(valid_bool)
+        self.assertIs(valid_reason, 'Valid')
 
     def test_isupper(self):
         self.assertTrue('FOO'.isupper())
