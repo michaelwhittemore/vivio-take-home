@@ -8,6 +8,13 @@
 import csv
 import json
 from datetime import datetime
+import sys
+import requests
+# https://api.fda.gov/drug/ndc.json?search=product_ndc:00002-7510-01
+# https://api.fda.gov/drug/ndc.json?search=product_ndc:82757-102 - returns a result
+# https://api.fda.gov/drug/ndc.json?search=product_ndc:50580-475 - also valid
+# https://api.fda.gov/drug/ndc.json?search=product_ndc:0002-7510 - this is the exmample, it returns insulin
+# base_url = 'https://api.fda.gov/drug/ndc.json'
 
 
 # We assume a consistent data structure
@@ -22,6 +29,42 @@ column_number_to_field = {
     6: 'drug_cost', # (float, wholesale cost) - drug_cost must be positive
     7: 'plan_type' # (string: "commercial", "medicare", "medicaid") - should be one of these
 }
+
+def convert_ndc(ndc: str) -> tuple[bool, str | list]:
+    """NDCs can only be searched by the product ndc (not the package ndc).
+    The product ndc is nine digits (labeler code plus product code). The last part of the ndc
+    is the package code which doesn't appear to be supported as part of the API endpoint.
+    The packed code is separately returned as part of the package field. The 'labeler-product' code can be
+    either eight or nine digits. This returns a tuple with a bool indicating if it was a valid ndc, 
+    and either the converted searchable value or a failure reason."""
+    # it's possible to have multiple possible ndc's as in the 00002-7597-01 case
+    # see https://www.fda.gov/media/173715/download page 6 
+    # 5-4-1 -> 5-4-2 the zero goes on in front of package
+    # 5-3-2 -> 5-4-2 the zero goes in front of product
+    # 4-4-2 -> 5-4-2 the zero goes in front of labeler
+    if not '-' in ndc:
+        return [False, 'NDC does not contain hyphens']
+    split_ndc = ndc.split('-')
+    if len(split_ndc) != 3:
+        return [False, 'NDC not fully formed']
+    labeler, product, package = split_ndc
+    possible_combinations = [labeler + '-' + product, ]
+    if labeler[0] == '0':
+        possible_combinations.append(labeler[1:] + '-' + product)
+    if product[0] == '0':
+        possible_combinations.append(labeler + '-' + product[1:])
+    # I guess we just try all possible cases - note that only one zero will ever be added
+    print(possible_combinations)
+    return [True, possible_combinations]
+
+def query_ndcs(processed_ndcs:str) -> bool:
+    '''returns true if at least one of the permutations is true'''
+    fda_url = 'https://api.fda.gov/drug/ndc.json?search=product_ndc:'
+    for ndc in processed_ndcs:
+        response = requests.get(fda_url + ndc)
+        if response.status_code == 200:
+            return True
+    return False
 
 claim_id_list =  []
 def validate_claim_id(claim_id) -> tuple[bool, str]:
@@ -56,7 +99,21 @@ def validate_ndc(ndc) -> tuple[bool, str]:
     except ValueError:
         # print('stripped ndc is not a number', stripped_ndc)
         return [False, 'stripped ndc is not a number']
-    return [True, 'Valid']
+    if not use_ndc_api:
+        # We're not using the api for queries 
+        return [True, 'Valid']
+    is_valid_ndc, processed_ndcs = convert_ndc(ndc)
+    if not is_valid_ndc:
+        return [False, processed_ndcs]
+    else:
+        found_ndc = query_ndcs(processed_ndcs)
+        if found_ndc:
+            return [True, 'Valid']
+        else:
+            return [False, 'Could not find ndc in FDA database']
+    
+        
+
 
 def validate_date(date) -> tuple[bool, str]:
     """ensure it's a valid date and not future dated"""
@@ -147,7 +204,6 @@ def validate_row(row: list) -> tuple[bool, str]:
         return [False, 'Invalid pills per day']
     else:
         return [True, 'null']
-    
 
 def calculate_copay_from_row(row: list) -> float:
     """calculates using the plan type, NDC, and cost"""
@@ -202,5 +258,8 @@ def main():
     with open('processed_claims.json', 'w') as outfile:
         json.dump(output_for_json, outfile, indent=4)
 
+use_ndc_api = 'query' in sys.argv
 if __name__ == "__main__":
     main()
+
+query_ndcs(['50242-0040', '50242-040'])

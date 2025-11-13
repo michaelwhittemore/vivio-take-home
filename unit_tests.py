@@ -181,6 +181,35 @@ class TestCopayCalculator(unittest.TestCase):
         # otherwise cost 20% (rounded to two decimals)
         self.assertEqual(process_script.calculate_copay_from_row(commercial_calculated), 85.12)
         
+class TestNDCConverter(unittest.TestCase):
+    def test_convert_ndc(self):
+        ndc_no_hyphens = '98765432109'
+        ndc_two_parts = '82757-102'
+        # taken from https://health.maryland.gov/phpa/oideor/immun/shared%20documents/handout%203%20-%20ndc%20conversion%20to%2011%20digits.pdf
+        ndc_labeler = '00002-7597-01' # Olanzapine
+        ndc_product= '50242-0040-62' # Omalizumab
+        ndc_one_combo = '72202-201-41' # CHLOROXYLENOL
+        # No hyphens 
+        output_bool, output_str = process_script.convert_ndc(ndc_no_hyphens)
+        self.assertFalse(output_bool)
+        self.assertEqual(output_str, 'NDC does not contain hyphens')
+        # Doesn't contain labeler, product, and package
+        output_bool, output_str = process_script.convert_ndc(ndc_two_parts)
+        self.assertFalse(output_bool)
+        self.assertEqual(output_str, 'NDC not fully formed')
+        # Can include shorter labeler
+        output_bool, output_str = process_script.convert_ndc(ndc_labeler)
+        self.assertTrue(output_bool)
+        self.assertEqual(output_str, ['00002-7597', '0002-7597'])
+        # Can include shorter product
+        output_bool, output_str = process_script.convert_ndc(ndc_product)
+        self.assertTrue(output_bool)
+        self.assertEqual(output_str, ['50242-0040', '50242-040'])
+        # Only one possible product
+        output_bool, output_str = process_script.convert_ndc(ndc_one_combo)
+        self.assertTrue(output_bool)
+        self.assertEqual(output_str, ['72202-201'])
+
 
 if __name__ == '__main__':
     unittest.main()
