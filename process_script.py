@@ -3,6 +3,7 @@
 # note that I'm commit more than I otherwise would
 # should I download the NDC database or use an API? Let's check how big the file is - if I do it with the API should do some cacheing
 # also maybe add a run option? for NDC validation I mean
+# also note that I would add some parameters to command line for ease of modifying files
 # https://open.fda.gov/apis/drug/ndc/
 import csv
 import json

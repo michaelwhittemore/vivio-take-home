@@ -4,181 +4,181 @@
         "status": "APPROVED",
         "copay_amount": 30.0,
         "rejection_reason": "null",
-        "processed_at": "2025-11-12T16:27:06.371238"
+        "processed_at": "2025-11-12T17:45:20.909565"
     },
     "2": {
         "claim_id": "CLM002",
         "status": "APPROVED",
-        "copay_amount": 15,
+        "copay_amount": 5,
         "rejection_reason": "null",
-        "processed_at": "2025-11-12T16:27:06.371331"
+        "processed_at": "2025-11-12T17:45:20.909630"
     },
     "3": {
         "claim_id": "CLM003",
         "status": "APPROVED",
         "copay_amount": 0,
         "rejection_reason": "null",
-        "processed_at": "2025-11-12T16:27:06.371374"
+        "processed_at": "2025-11-12T17:45:20.909663"
     },
     "4": {
         "claim_id": "CLM004",
         "status": "REJECT",
         "copay_amount": "N/A",
-        "rejection_reason": "member id not ten digits",
-        "processed_at": "2025-11-12T16:27:06.371389"
+        "rejection_reason": "member is not ten digits",
+        "processed_at": "2025-11-12T17:45:20.909672"
     },
     "5": {
         "claim_id": "notNumberMemID",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "member id is not a number",
-        "processed_at": "2025-11-12T16:27:06.371407"
+        "processed_at": "2025-11-12T17:45:20.909683"
     },
     "6": {
         "claim_id": "duplicate",
         "status": "APPROVED",
         "copay_amount": 30.0,
         "rejection_reason": "null",
-        "processed_at": "2025-11-12T16:27:06.371442"
+        "processed_at": "2025-11-12T17:45:20.909711"
     },
     "7": {
         "claim_id": "duplicate",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "Duplicate claim Id",
-        "processed_at": "2025-11-12T16:27:06.371452"
+        "processed_at": "2025-11-12T17:45:20.909721"
     },
     "8": {
         "claim_id": "shortNDC",
         "status": "REJECT",
         "copay_amount": "N/A",
-        "rejection_reason": "member id not ten digits",
-        "processed_at": "2025-11-12T16:27:06.371463"
+        "rejection_reason": "stripped ndc does not have 11 digits",
+        "processed_at": "2025-11-12T17:45:20.909727"
     },
     "9": {
         "claim_id": "longNDC",
         "status": "REJECT",
         "copay_amount": "N/A",
-        "rejection_reason": "member id not ten digits",
-        "processed_at": "2025-11-12T16:27:06.371473"
+        "rejection_reason": "stripped ndc does not have 11 digits",
+        "processed_at": "2025-11-12T17:45:20.909733"
     },
     "10": {
         "claim_id": "badNDC",
         "status": "REJECT",
         "copay_amount": "N/A",
-        "rejection_reason": "member id not ten digits",
-        "processed_at": "2025-11-12T16:27:06.371482"
+        "rejection_reason": "stripped ndc is not a number",
+        "processed_at": "2025-11-12T17:45:20.909742"
     },
     "11": {
         "claim_id": "badDateFormat",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "invalid date",
-        "processed_at": "2025-11-12T16:27:06.371506"
+        "processed_at": "2025-11-12T17:45:20.909761"
     },
     "12": {
         "claim_id": "futureDate",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "future date",
-        "processed_at": "2025-11-12T16:27:06.371537"
+        "processed_at": "2025-11-12T17:45:20.909785"
     },
     "13": {
         "claim_id": "zeroQuantity",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "future date",
-        "processed_at": "2025-11-12T16:27:06.371565"
+        "processed_at": "2025-11-12T17:45:20.909805"
     },
     "14": {
         "claim_id": "negativeQuantity",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "future date",
-        "processed_at": "2025-11-12T16:27:06.371592"
+        "processed_at": "2025-11-12T17:45:20.909824"
     },
     "15": {
         "claim_id": "floatQuantity",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "future date",
-        "processed_at": "2025-11-12T16:27:06.371618"
+        "processed_at": "2025-11-12T17:45:20.909842"
     },
     "16": {
         "claim_id": "floatSupply",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "non-int supply",
-        "processed_at": "2025-11-12T16:27:06.371649"
+        "processed_at": "2025-11-12T17:45:20.909865"
     },
     "17": {
         "claim_id": "largeSupply",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "supply not between 1 and 90",
-        "processed_at": "2025-11-12T16:27:06.371676"
+        "processed_at": "2025-11-12T17:45:20.909891"
     },
     "18": {
         "claim_id": "negativeCost",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "cost not positive",
-        "processed_at": "2025-11-12T16:27:06.371711"
+        "processed_at": "2025-11-12T17:45:20.909917"
     },
     "19": {
         "claim_id": "badCost",
         "status": "REJECT",
         "copay_amount": "N/A",
-        "rejection_reason": "non-int cost",
-        "processed_at": "2025-11-12T16:27:06.371741"
+        "rejection_reason": "non-number cost",
+        "processed_at": "2025-11-12T17:45:20.909940"
     },
     "20": {
         "claim_id": "invalidPlan",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "invalid plan type",
-        "processed_at": "2025-11-12T16:27:06.371769"
+        "processed_at": "2025-11-12T17:45:20.909961"
     },
     "21": {
         "claim_id": "medicareBrand",
         "status": "APPROVED",
-        "copay_amount": 5,
+        "copay_amount": 15,
         "rejection_reason": "null",
-        "processed_at": "2025-11-12T16:27:06.371803"
+        "processed_at": "2025-11-12T17:45:20.909982"
     },
     "22": {
         "claim_id": "medicareGeneric",
         "status": "APPROVED",
-        "copay_amount": 15,
+        "copay_amount": 5,
         "rejection_reason": "null",
-        "processed_at": "2025-11-12T16:27:06.371833"
+        "processed_at": "2025-11-12T17:45:20.910009"
     },
     "23": {
         "claim_id": "commercialCheap",
         "status": "APPROVED",
         "copay_amount": 10,
         "rejection_reason": "null",
-        "processed_at": "2025-11-12T16:27:06.371864"
+        "processed_at": "2025-11-12T17:45:20.910032"
     },
     "24": {
         "claim_id": "commercialExpensive",
         "status": "APPROVED",
         "copay_amount": 100,
         "rejection_reason": "null",
-        "processed_at": "2025-11-12T16:27:06.371896"
+        "processed_at": "2025-11-12T17:45:20.910056"
     },
     "25": {
         "claim_id": "commercialMidrange",
         "status": "APPROVED",
         "copay_amount": 85.1,
         "rejection_reason": "null",
-        "processed_at": "2025-11-12T16:27:06.371930"
+        "processed_at": "2025-11-12T17:45:20.910078"
     },
     "26": {
         "claim_id": "tooManyPills",
         "status": "REJECT",
         "copay_amount": "N/A",
         "rejection_reason": "Invalid pills per day",
-        "processed_at": "2025-11-12T16:27:06.372028"
+        "processed_at": "2025-11-12T17:45:20.910120"
     }
 }
