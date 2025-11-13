@@ -1,12 +1,19 @@
 import unittest
 import process_script
 
-#validator_function_tuple = (validate_claim_id, validate_ndc, validate_date, validate_quantity,
+#validator_function_tuple = (validate_claim_id, , validate_quantity,
 #                            validate_days_supply,validate_drug_cost, validate_plan_type)
 
 class TestValidators(unittest.TestCase):
-    # def test_validate_claim_id(self):
-    #     validate_claim_id()
+    def test_validate_claim_id(self):
+        # Happy path
+        tested_bool, tested_reason = process_script.validate_claim_id('aDuplicateName')
+        self.assertTrue(tested_bool)
+        self.assertEqual(tested_reason, 'Valid')
+        # invalid when reusing the claim id
+        tested_bool, tested_reason = process_script.validate_claim_id('aDuplicateName')
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'Duplicate claim Id')
 
     def test_validate_member_id(self):
         valid_id =  '1234567890'
@@ -34,7 +41,7 @@ class TestValidators(unittest.TestCase):
         valid_dnc =  '00002-7510-01'
         short_dnc = '002-7510-01'
         long_dnc = '000102-7510-01'
-        non_int_dnc = '000a2-7510-01'
+        non_int_dnc = '0000A-7510-01'
         # Happy path
         valid_bool, valid_reason = process_script.validate_ndc(valid_dnc)
         self.assertTrue(valid_bool)
@@ -52,7 +59,22 @@ class TestValidators(unittest.TestCase):
         self.assertFalse(not_int_bool)
         self.assertEqual(not_int_reason, 'stripped ndc is not a number')
 
-
+    def test_validate_date(self):
+        valid_date = '2025-10-15'
+        invalid_date = '2025-99-15'
+        future_date = '2030-10-15'
+        # Happy path
+        valid_bool, valid_reason = process_script.validate_date(valid_date)
+        self.assertTrue(valid_bool)
+        self.assertEqual(valid_reason, 'Valid')
+        # Badly formatted date
+        tested_bool, tested_reason = process_script.validate_date(invalid_date)
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'invalid date')
+        # Future Date
+        tested_bool, tested_reason = process_script.validate_date(future_date)
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'future date')
 
 if __name__ == '__main__':
     unittest.main()
@@ -60,15 +82,7 @@ if __name__ == '__main__':
 """
 ['claim_id', 'member_id', 'ndc', 'date_of_service', 'quantity', 'days_supply', 'drug_cost', 'plan_type']
 ['CLM001', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
-['CLM002', '9876543210', '12345678901', '2025-10-20', '90', '30', '200.00', 'medicare']
-['CLM003', '1111111111', '98765432109', '2025-11-01', '60', '90', '75.00', 'medicaid']
-['CLM004', '999', '00001-2345-67', '2025-10-10', '120', '30', '300.00', 'commercial']
-['notNumberMemID', 'a123456789', '00001-2345-67', '2025-10-10', '120', '30', '300.00', 'commercial']
-['duplicate', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
-['duplicate', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
-['shortNDC', ' 1234567890', '0002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
-['longNDC', ' 1234567890', '000021-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
-['badNDC', ' 1234567890', '0000A-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
+
 ['badDateFormat', '1234567890', '00002-7510-01', '2025-13-15', '30', '30', '150.00', 'commercial']
 ['futureDate', '1234567890', '00002-7510-01', '2030-10-15', '30', '30', '150.00', 'commercial']
 ['zeroQuantity', '1234567890', '00002-7510-01', '2030-10-15', '0', '30', '150.00', 'commercial']
