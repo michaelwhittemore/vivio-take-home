@@ -1,8 +1,7 @@
 import unittest
 import process_script
 
-#validator_function_tuple = (validate_claim_id, , validate_quantity,
-#                            validate_days_supply,validate_drug_cost, validate_plan_type)
+#validator_function_tuple = (,validate_drug_cost, validate_plan_type)
 
 class TestValidators(unittest.TestCase):
     def test_validate_claim_id(self):
@@ -76,6 +75,51 @@ class TestValidators(unittest.TestCase):
         self.assertFalse(tested_bool)
         self.assertEqual(tested_reason, 'future date')
 
+    def test_validate_quantity(self):
+        valid_quantity = '150'
+        zero_quantity = '0'
+        negative_quantity = '-20'
+        float_quantity = '23.1'
+        # Happy path
+        tested_bool, tested_reason = process_script.validate_quantity(valid_quantity)
+        self.assertTrue(tested_bool)
+        self.assertEqual(tested_reason, 'Valid')
+        # Zero Quantity 
+        tested_bool, tested_reason = process_script.validate_quantity(zero_quantity)
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'quantity not positive int')
+        # Negative Quantity 
+        tested_bool, tested_reason = process_script.validate_quantity(negative_quantity)
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'quantity not positive int')
+        # Float Quantity 
+        tested_bool, tested_reason = process_script.validate_quantity(float_quantity)
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'non-int quantity')
+
+    def test_validate_days_supply(self):
+        valid_supply = '30'
+        float_supply = '30.5'
+        large_supply = '99'
+        negative_supply = '-30'
+        # Happy path
+        tested_bool, tested_reason = process_script.validate_days_supply(valid_supply)
+        self.assertTrue(tested_bool)
+        self.assertEqual(tested_reason, 'Valid')
+        # large supply
+        tested_bool, tested_reason = process_script.validate_days_supply(large_supply)
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'supply not between 1 and 90')
+        # negative supply
+        tested_bool, tested_reason = process_script.validate_days_supply(negative_supply)
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'supply not between 1 and 90')
+        # invalid supply 
+        tested_bool, tested_reason = process_script.validate_days_supply(float_supply)
+        self.assertFalse(tested_bool)
+        self.assertEqual(tested_reason, 'non-int supply')
+
+
 if __name__ == '__main__':
     unittest.main()
 
@@ -83,11 +127,6 @@ if __name__ == '__main__':
 ['claim_id', 'member_id', 'ndc', 'date_of_service', 'quantity', 'days_supply', 'drug_cost', 'plan_type']
 ['CLM001', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
 
-['badDateFormat', '1234567890', '00002-7510-01', '2025-13-15', '30', '30', '150.00', 'commercial']
-['futureDate', '1234567890', '00002-7510-01', '2030-10-15', '30', '30', '150.00', 'commercial']
-['zeroQuantity', '1234567890', '00002-7510-01', '2030-10-15', '0', '30', '150.00', 'commercial']
-['negativeQuantity', '1234567890', '00002-7510-01', '2030-10-15', '-30', '30', '150.00', 'commercial']
-['floatQuantity', '1234567890', '00002-7510-01', '2030-10-15', '30.5', '30', '150.00', 'commercial']
 ['floatSupply', '1234567890', '00002-7510-01', '2025-10-15', '30', '30.4', '150.00', 'commercial']
 ['largeSupply', '1234567890', '00002-7510-01', '2025-10-15', '30', '99', '150.00', 'commercial']
 ['negativeCost', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '-150.00', 'commercial']
