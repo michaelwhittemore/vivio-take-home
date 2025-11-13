@@ -10,11 +10,6 @@ import json
 from datetime import datetime
 import sys
 import requests
-# https://api.fda.gov/drug/ndc.json?search=product_ndc:00002-7510-01
-# https://api.fda.gov/drug/ndc.json?search=product_ndc:82757-102 - returns a result
-# https://api.fda.gov/drug/ndc.json?search=product_ndc:50580-475 - also valid
-# https://api.fda.gov/drug/ndc.json?search=product_ndc:0002-7510 - this is the exmample, it returns insulin
-# base_url = 'https://api.fda.gov/drug/ndc.json'
 
 
 # We assume a consistent data structure
@@ -57,13 +52,21 @@ def convert_ndc(ndc: str) -> tuple[bool, str | list]:
     print(possible_combinations)
     return [True, possible_combinations]
 
+query_memoization = {}
+
 def query_ndcs(processed_ndcs:str) -> bool:
     '''returns true if at least one of the permutations is true'''
+    tuple_processed_ndcs = tuple(processed_ndcs) # need to cast to tuple to use as key
+
+    if tuple_processed_ndcs in query_memoization:
+        return query_memoization[tuple_processed_ndcs]
     fda_url = 'https://api.fda.gov/drug/ndc.json?search=product_ndc:'
-    for ndc in processed_ndcs:
+    for ndc in tuple_processed_ndcs:
         response = requests.get(fda_url + ndc)
         if response.status_code == 200:
+            query_memoization[tuple_processed_ndcs] = True
             return True
+    query_memoization[tuple_processed_ndcs] = False
     return False
 
 claim_id_list =  []
@@ -111,9 +114,6 @@ def validate_ndc(ndc) -> tuple[bool, str]:
             return [True, 'Valid']
         else:
             return [False, 'Could not find ndc in FDA database']
-    
-        
-
 
 def validate_date(date) -> tuple[bool, str]:
     """ensure it's a valid date and not future dated"""
