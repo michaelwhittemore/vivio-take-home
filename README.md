@@ -10,6 +10,9 @@ This is a fairly simple python script which takes in a csv file of claims and ou
 * We expect to see `Ran 10 tests in 0.004s. OK`(we use unittest.py)
 * All validator functions are calculators are tested
 
+# A note on NDC validation 
+I was attempting to use the FDA API endpoints to validate if the NDC's were valid 
+
 # Future improvements    
 * Code dryness - Especially in the test script there's a fair bit of copy-paste. This could be improved with some helper functions
 * terminal parameters - it would be nice to allow the user to specify the input and output file names from within the terminal when running the script
