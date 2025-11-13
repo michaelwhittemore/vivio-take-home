@@ -10,8 +10,8 @@ This is a fairly simple python script which takes in a csv file of claims and ou
 * We expect to see `Ran 10 tests in 0.004s. OK`(we use unittest.py)
 * All validator functions are calculators are tested
 
-# A note on NDC validation 
-I was attempting to use the FDA API endpoints to validate if the NDC's were valid 
+# A note on NDC validation  
+I was attempting to use the FDA API endpoints to validate if the NDC's were valid. From my research, it appears that NDCs should be ten digits and may be in the form 4-4-2 – 5-3-2 – 5-4-1 (see https://www.fda.gov/media/173715/download) which may then be converted to an eleven digit format by adding an appropriate zero. The FDA API endpoint only supports a 10 digit query parameter. I'm in the process of appropriately updating the validator. 
 
 # Future improvements    
 * Code dryness - Especially in the test script there's a fair bit of copy-paste. This could be improved with some helper functions
