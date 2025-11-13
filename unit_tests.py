@@ -137,7 +137,6 @@ class TestValidators(unittest.TestCase):
     
     def test_validate_plan_type(self):
         # Happy paths
-        "commercial", "medicare", "medicaid"
         tested_bool, tested_reason = process_script.validate_plan_type('commercial')
         self.assertTrue(tested_bool)
         self.assertEqual(tested_reason, 'Valid')
@@ -152,20 +151,36 @@ class TestValidators(unittest.TestCase):
         self.assertFalse(tested_bool)
         self.assertEqual(tested_reason, 'invalid plan type')       
 
+    def test_validate_pills_per_day(self):
+        valid_row = ['CLM001', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
+        invalid_row = ['tooManyPills', '1234567890', '00002-7510-01', '2025-10-15', '40', '10', '150.00', 'commercial']
+        # Happy path
+        tested_bool= process_script.validate_pills_per_day(valid_row)
+        self.assertTrue(tested_bool)
+        # Four pills per day
+        tested_bool = process_script.validate_pills_per_day(invalid_row)
+        self.assertFalse(tested_bool)
+
+class TestCopayCalculator(unittest.TestCase):
+    def test_calculate_copay_from_row(self):
+        medicaid = ['medicaid', '9876543210', '12345678901', '2025-10-20', '90', '30', '200.00', 'medicaid']
+        medicare_brand =  ['medicareBrand', '9876543210', '02345678901', '2025-10-20', '90', '30', '200.00', 'medicare']
+        medicare_generic = ['medicareGeneric', '9876543210', '12345678901', '2025-10-20', '90', '30', '200.00', 'medicare']
+        commercial_min = ['commercialCheap', '9876543210', '02345678901', '2025-10-20', '90', '30', '10.00', 'commercial']
+        commercial_max = ['commercialExpensive', '9876543210', '02345678901', '2025-10-20', '90', '30', '2000.00', 'commercial']
+        commercial_calculated = ['commercialMidrange', '9876543210', '02345678901', '2025-10-20', '90', '30', '425.58', 'commercial']
+        # medicaid always $0
+        self.assertEqual(process_script.calculate_copay_from_row(medicaid), 0)
+        # medicare brand is $15
+        self.assertEqual(process_script.calculate_copay_from_row(medicare_brand), 15)
+        # medicare generic is $15
+        self.assertEqual(process_script.calculate_copay_from_row(medicare_generic), 5)
+        # commercial maxes out at $100 and has a minimum of $0
+        self.assertEqual(process_script.calculate_copay_from_row(commercial_min), 10)
+        self.assertEqual(process_script.calculate_copay_from_row(commercial_max), 100)
+        # otherwise cost 20% (rounded to two decimals)
+        self.assertEqual(process_script.calculate_copay_from_row(commercial_calculated), 85.12)
+        
+
 if __name__ == '__main__':
     unittest.main()
-
-"""
-['claim_id', 'member_id', 'ndc', 'date_of_service', 'quantity', 'days_supply', 'drug_cost', 'plan_type']
-['CLM001', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'commercial']
-
-['negativeCost', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '-150.00', 'commercial']
-['badCost', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '15a0.00', 'commercial']
-['invalidPlan', '1234567890', '00002-7510-01', '2025-10-15', '30', '30', '150.00', 'badPlanString']
-['medicareBrand', '9876543210', '02345678901', '2025-10-20', '90', '30', '200.00', 'medicare']
-['medicareGeneric', '9876543210', '12345678901', '2025-10-20', '90', '30', '200.00', 'medicare']
-['commercialCheap', '9876543210', '02345678901', '2025-10-20', '90', '30', '10.00', 'commercial']
-['commercialExpensive', '9876543210', '02345678901', '2025-10-20', '90', '30', '2000.00', 'commercial']
-['commercialMidrange', '9876543210', '02345678901', '2025-10-20', '90', '30', '425.50', 'commercial']
-['tooManyPills', '1234567890', '00002-7510-01', '2025-10-15', '40', '10', '150.00', 'commercial']
-"""

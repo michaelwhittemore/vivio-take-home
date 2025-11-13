@@ -157,7 +157,7 @@ def calculate_copay_from_row(row: list) -> float:
             return 0
         case 'medicare':
             # Medicare: $5 flat copay for generic, $15 for brand (if NDC starts with "0")
-            return 5 if row[2][0] == '0' else 15
+            return 15 if row[2][0] == '0' else 5
         case 'commercial':
             # Commercial: 20% coinsurance, minimum $10, maximum $100
             cost = float(row[6])
